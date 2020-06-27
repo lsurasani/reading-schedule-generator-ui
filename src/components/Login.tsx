@@ -12,11 +12,12 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "50%",
       backgroundColor: "white",
       padding: 20,
-      margin: 20,
       color: "#7986cb",
       WebkitBoxShadow: "-22px 0px 48px 0px rgba(0, 0, 0, 0.75)",
       MozBoxShadow: "-22px 0px 48px 0px rgba(0, 0, 0, 0.75)",
       boxShadow: "-22px 0px 48px 0px rgba(0, 0, 0, 0.75)",
+      display: "block",
+      margin: "auto",
     },
   })
 );

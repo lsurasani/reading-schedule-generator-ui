@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
-import { useLazyQuery, useQuery, useMutation } from "@apollo/react-hooks";
+import { useLazyQuery, useMutation } from "@apollo/react-hooks";
 import ScheduledBooks from "./BooksTables/ScheduledBooks";
 import UnscheduledBooks from "./BooksTables/UnscheduledBooks";
 import {
@@ -56,7 +56,7 @@ const Home = () => {
     getCurrentBooks();
     getUpcomingBooks();
     getUnscheduledBooks();
-  }, []);
+  }, [getCurrentBooks, getUnscheduledBooks, getUpcomingBooks]);
 
   const [createUserBook] = useMutation(CREATE_USER_BOOK, {
     onCompleted({ createUserBookFromBook }) {
@@ -67,14 +67,14 @@ const Home = () => {
           const start = new Date(newBook.startDate);
           const end = new Date(newBook.endDate);
           if (start <= new Date() && end >= new Date()) {
-            console.log("current");
+            currentData.getCurrentUserBooks.push(newBook);
             getCurrentBooks();
           } else if (start > new Date()) {
-            console.log("upcoming");
+            upcomingData.getUpcomingUserBooks.push(newBook);
             getUpcomingBooks();
           }
         } else {
-          console.log("unscheduled");
+          unscheduledData.getUnscheduledUserBooks.push(newBook);
           getUnscheduledBooks();
         }
         setModal(false);
@@ -85,9 +85,6 @@ const Home = () => {
       console.log(error);
     },
   });
-
-  console.log("current data", currentData);
-  console.log("upcoming data", upcomingData);
 
   const [isOpen, setModal] = useState(false);
 
@@ -109,7 +106,7 @@ const Home = () => {
       justify="center"
       alignItems="flex-start"
     >
-      <Grid item xs={4}>
+      <Grid item xs={5}>
         <Container className={classes.root}>
           <p>Current Books</p>
           <ScheduledBooks
@@ -119,7 +116,7 @@ const Home = () => {
           />
         </Container>
       </Grid>
-      <Grid item xs={4}>
+      <Grid item xs={5}>
         <Container className={classes.root}>
           <p>Upcoming Books</p>
           <ScheduledBooks
