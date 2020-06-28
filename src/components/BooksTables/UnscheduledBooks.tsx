@@ -6,11 +6,13 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import { formatDate } from "../../shared/utils";
 import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
 import TablePagination from "@material-ui/core/TablePagination";
+import AddIcon from "@material-ui/icons/Add";
+import AddBook from "../modals/AddBook";
+import ScheduleBook from "../modals/ScheduleBook";
 
 const createRows = (data: any) => {
   let rows: Array<Record<string, string>> = [];
@@ -20,8 +22,6 @@ const createRows = (data: any) => {
       title: item.book.title,
       author: item.book.author,
       pages: item.book.pages,
-      start: formatDate(item.startDate),
-      end: formatDate(item.endDate),
     };
     rows.push(row);
   });
@@ -39,21 +39,39 @@ const useStyles = makeStyles((theme: Theme) =>
     editButton: {
       float: "right",
     },
+    addBook: {
+      marginTop: 20,
+    },
   })
 );
 
 const UnscheduledBooks = (props: any) => {
-  const { loading, error, data } = props;
+  const {
+    loading,
+    error,
+    data,
+    createBook,
+    editBook,
+    addBookModalOptions,
+    scheduleBookModalOptions,
+  } = props;
   const rowsPerPage = 5;
-  const [selected, setSelected] = useState("");
+
+  const emptySelection = {
+    id: "",
+    title: "",
+    author: "",
+    pages: "",
+  };
+  const [selected, setSelected] = useState(emptySelection);
   const [page, setPage] = useState(0);
 
-  const handleClick = (bookId: string) =>
-    !isSelected(bookId) || selected === ""
-      ? setSelected(bookId)
-      : setSelected("");
+  const handleClick = (book: any) =>
+    !isSelected(book.id) || selected === emptySelection
+      ? setSelected(book)
+      : setSelected(emptySelection);
 
-  const isSelected = (id: string) => selected === id;
+  const isSelected = (id: string) => selected.id === id;
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -67,8 +85,9 @@ const UnscheduledBooks = (props: any) => {
       <Button
         variant="contained"
         color="secondary"
-        disabled={!selected}
+        disabled={!selected.id}
         className={classes.editButton}
+        onClick={() => selected.id && scheduleBookModalOptions.handleOpen()}
       >
         <CalendarTodayIcon />
         Schedule
@@ -91,10 +110,7 @@ const UnscheduledBooks = (props: any) => {
                   .map((book) => {
                     const isItemSelected = isSelected(book.id);
                     return (
-                      <TableRow
-                        key={book.id}
-                        onClick={() => handleClick(book.id)}
-                      >
+                      <TableRow key={book.id} onClick={() => handleClick(book)}>
                         <Checkbox checked={isItemSelected} />
                         <TableCell>{book.title}</TableCell>
                         <TableCell>{book.author}</TableCell>
@@ -117,6 +133,28 @@ const UnscheduledBooks = (props: any) => {
       ) : (
         <div></div>
       )}
+      <Button
+        className={classes.addBook}
+        variant="contained"
+        color="primary"
+        onClick={() => addBookModalOptions.handleOpen()}
+      >
+        <AddIcon />
+        Add Book
+      </Button>
+      <AddBook
+        isOpen={addBookModalOptions.isOpen}
+        handleClose={addBookModalOptions.handleClose}
+        createBook={createBook}
+      />
+      <ScheduleBook
+        isOpen={scheduleBookModalOptions.isOpen}
+        handleClose={scheduleBookModalOptions.handleClose}
+        title={selected.title}
+        author={selected.author}
+        scheduleBook={editBook}
+        userBookId={selected.id}
+      />
     </div>
   );
 };

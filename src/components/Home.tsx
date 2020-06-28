@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles, createStyles, Theme } from "@material-ui/core/styles";
-import { useLazyQuery, useMutation } from "@apollo/react-hooks";
+import {
+  useLazyQuery,
+  useMutation,
+  useApolloClient,
+} from "@apollo/react-hooks";
 import ScheduledBooks from "./BooksTables/ScheduledBooks";
 import UnscheduledBooks from "./BooksTables/UnscheduledBooks";
 import {
@@ -8,12 +12,20 @@ import {
   GET_UPCOMING_BOOKS,
   GET_UNSCHEDULED_BOOKS,
 } from "../shared/graphql/queries";
-import { CREATE_USER_BOOK } from "../shared/graphql/mutations";
+import {
+  CREATE_USER_BOOK,
+  UPDATE_USER_BOOK,
+} from "../shared/graphql/mutations";
 import Grid from "@material-ui/core/Grid";
 import Container from "@material-ui/core/Container";
-import Button from "@material-ui/core/Button";
-import AddIcon from "@material-ui/icons/Add";
-import AddBook from "./AddBook";
+
+async function getUnscheduleBooksQuery(client: any) {
+  const { data } = await client.query({
+    query: GET_UNSCHEDULED_BOOKS,
+  });
+
+  return data;
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -25,9 +37,6 @@ const useStyles = makeStyles((theme: Theme) =>
       WebkitBoxShadow: "-22px 0px 48px 0px rgba(0, 0, 0, 0.75)",
       MozBoxShadow: "-22px 0px 48px 0px rgba(0, 0, 0, 0.75)",
       boxShadow: "-22px 0px 48px 0px rgba(0, 0, 0, 0.75)",
-    },
-    addBook: {
-      marginTop: 20,
     },
   })
 );
@@ -58,10 +67,11 @@ const Home = () => {
     getUnscheduledBooks();
   }, [getCurrentBooks, getUnscheduledBooks, getUpcomingBooks]);
 
+  const client = useApolloClient();
+
   const [createUserBook] = useMutation(CREATE_USER_BOOK, {
     onCompleted({ createUserBookFromBook }) {
       const newBook = createUserBookFromBook;
-      console.log(newBook);
       if (newBook.id) {
         if (newBook.startDate && newBook.endDate) {
           const start = new Date(newBook.startDate);
@@ -77,7 +87,7 @@ const Home = () => {
           unscheduledData.getUnscheduledUserBooks.push(newBook);
           getUnscheduledBooks();
         }
-        setModal(false);
+        setAddBookModal(false);
       }
     },
 
@@ -86,14 +96,51 @@ const Home = () => {
     },
   });
 
-  const [isOpen, setModal] = useState(false);
+  const [editUserBook] = useMutation(UPDATE_USER_BOOK, {
+    onCompleted({ updateUserBook }) {
+      const userBook = updateUserBook;
+      console.log(updateUserBook);
+      if (userBook.id) {
+        if (userBook.startDate && userBook.endDate) {
+          const start = new Date(userBook.startDate);
+          const end = new Date(userBook.endDate);
+          if (start <= new Date() && end >= new Date()) {
+            currentData.getCurrentUserBooks.push(userBook);
+            getCurrentBooks();
+          } else if (start > new Date()) {
+            upcomingData.getUpcomingUserBooks.push(userBook);
+            getUpcomingBooks();
+          }
+        }
+        const newData = getUnscheduleBooksQuery(client);
+        setScheduleBookModal(false);
+        console.log(newData);
+        unscheduledData.getUnscheduledUserBooks = newData;
+      }
+    },
 
-  const handleOpen = () => {
-    setModal(true);
+    onError(error) {
+      console.log(error);
+    },
+  });
+
+  const [addBookIsOpen, setAddBookModal] = useState(false);
+  const [scheduleBookIsOpen, setScheduleBookModal] = useState(false);
+
+  const addBookHandleOpen = () => {
+    setAddBookModal(true);
   };
 
-  const handleClose = () => {
-    setModal(false);
+  const addBookHandleClose = () => {
+    setAddBookModal(false);
+  };
+
+  const scheduleBookHandleOpen = () => {
+    setScheduleBookModal(true);
+  };
+
+  const scheduleBookHandleClose = () => {
+    setScheduleBookModal(false);
   };
 
   const classes = useStyles();
@@ -135,23 +182,21 @@ const Home = () => {
             data={
               unscheduledData ? unscheduledData.getUnscheduledUserBooks : null
             }
+            createBook={createUserBook}
+            editBook={editUserBook}
+            addBookModalOptions={{
+              isOpen: addBookIsOpen,
+              handleClose: addBookHandleClose,
+              handleOpen: addBookHandleOpen,
+            }}
+            scheduleBookModalOptions={{
+              isOpen: scheduleBookIsOpen,
+              handleClose: scheduleBookHandleClose,
+              handleOpen: scheduleBookHandleOpen,
+            }}
           />
-          <Button
-            className={classes.addBook}
-            variant="contained"
-            color="primary"
-            onClick={() => handleOpen()}
-          >
-            <AddIcon />
-            Add Book
-          </Button>
         </Container>
       </Grid>
-      <AddBook
-        isOpen={isOpen}
-        handleClose={handleClose}
-        createUserBook={createUserBook}
-      />
     </Grid>
   );
 };

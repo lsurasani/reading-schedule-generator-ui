@@ -23,3 +23,19 @@ export const CREATE_USER_BOOK = gql`
     }
   }
 `;
+
+export const UPDATE_USER_BOOK = gql`
+  mutation updateUserBook($input: UpdateUserBookInput!) {
+    updateUserBook(input: $input) {
+      id
+      book {
+        id
+        title
+        author
+        pages
+      }
+      startDate
+      endDate
+    }
+  }
+`;

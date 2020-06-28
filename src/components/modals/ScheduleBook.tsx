@@ -4,35 +4,30 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import TextField from "@material-ui/core/TextField";
 import { DatePicker } from "@material-ui/pickers";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 
-const AddBook = (props: any) => {
-  const { isOpen, handleClose, createUserBook } = props;
+const ScheduleBook = (props: any) => {
+  const {
+    isOpen,
+    handleClose,
+    scheduleBook,
+    title,
+    author,
+    userBookId,
+  } = props;
+  console.log(props);
   const errorDefault = {
-    title: "",
-    author: "",
-    pages: "",
-    isbn: "",
     startDate: "",
     endDate: "",
   };
 
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [pages, setPages] = useState<number | string>("");
-  const [isbn, setIsbn] = useState("");
   const [error, setError] = useState(errorDefault);
   const [startDate, setSelectedStartDate] = useState<Date | null>(null);
   const [endDate, setSelectedEndDate] = useState<Date | null>(null);
 
   const clearState = () => {
-    setTitle("");
-    setAuthor("");
-    setPages("");
-    setIsbn("");
     setError(errorDefault);
     setSelectedStartDate(null);
     setSelectedEndDate(null);
@@ -46,24 +41,6 @@ const AddBook = (props: any) => {
     setSelectedEndDate(date);
   };
 
-  const handlePageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const pages = parseInt(event.target.value);
-    if (isNaN(pages)) {
-      setPages("");
-      setError({ ...error, pages: "Please enter a number." });
-    } else {
-      setPages(pages);
-      setError({ ...error, pages: "" });
-    }
-  };
-
-  const handleChange = (
-    changeFn: React.Dispatch<React.SetStateAction<string>>,
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    changeFn(event.target.value);
-  };
-
   const validateInputs = () => {
     const noEndDateError = !endDate
       ? "End date is required if supplying a start date"
@@ -74,10 +51,6 @@ const AddBook = (props: any) => {
         : "";
 
     const newErrors = {
-      title: title ? "" : "Title is required",
-      author: author ? "" : "Author is required",
-      pages: pages ? "" : "Pages are required",
-      isbn: "",
       startDate:
         endDate && !startDate
           ? "Start date is required if supplying an end date"
@@ -94,70 +67,24 @@ const AddBook = (props: any) => {
   const submitInputs = () => {
     const userBookInputs = {
       input: {
-        title,
-        author,
-        pages,
-        isbn: isbn ? isbn : null,
+        id: userBookId,
         startDate,
         endDate,
       },
     };
 
-    createUserBook({ variables: userBookInputs });
+    scheduleBook({ variables: userBookInputs });
     clearState();
   };
 
   return (
     <Dialog open={isOpen} onClose={handleClose}>
-      <DialogTitle id="add-book-dialog">Add Book</DialogTitle>
+      <DialogTitle id="add-book-dialog">Schedule Book</DialogTitle>
       <DialogContent>
-        <DialogContentText>Please add a book to your list.</DialogContentText>
+        <DialogContentText>
+          {title} by {author}
+        </DialogContentText>
         <Grid container spacing={1}>
-          <Grid item xs={12}>
-            <TextField
-              error={!!error.title}
-              helperText={error.title}
-              margin="dense"
-              id="title"
-              label="Title"
-              fullWidth
-              value={title}
-              onChange={(e) => handleChange(setTitle, e)}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <TextField
-              error={!!error.author}
-              helperText={error.author}
-              margin="dense"
-              id="author"
-              label="Author"
-              value={author}
-              onChange={(e) => handleChange(setAuthor, e)}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <TextField
-              error={!!error.pages}
-              helperText={error.pages}
-              margin="dense"
-              id="pages"
-              label="Pages"
-              value={pages}
-              onChange={handlePageChange}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <TextField
-              error={!!error.isbn}
-              helperText={error.isbn}
-              margin="dense"
-              id="isbn"
-              label="ISBN-13"
-              value={isbn}
-              onChange={(e) => handleChange(setIsbn, e)}
-            />
-          </Grid>
           <Grid item xs={6}>
             <DatePicker
               error={!!error.startDate}
@@ -202,4 +129,4 @@ const AddBook = (props: any) => {
   );
 };
 
-export default AddBook;
+export default ScheduleBook;
