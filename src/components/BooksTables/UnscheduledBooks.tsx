@@ -11,7 +11,7 @@ import Button from "@material-ui/core/Button";
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
 import TablePagination from "@material-ui/core/TablePagination";
 import AddIcon from "@material-ui/icons/Add";
-import AddBook from "../modals/AddBook";
+import AddBookIsbn from "../modals/AddBookIsbn";
 import ScheduleBook from "../modals/ScheduleBook";
 
 const createRows = (data: any) => {
@@ -142,7 +142,7 @@ const UnscheduledBooks = (props: any) => {
         <AddIcon />
         Add Book
       </Button>
-      <AddBook
+      <AddBookIsbn
         isOpen={addBookModalOptions.isOpen}
         handleClose={addBookModalOptions.handleClose}
         createBook={createBook}
@@ -154,6 +154,7 @@ const UnscheduledBooks = (props: any) => {
         author={selected.author}
         scheduleBook={editBook}
         userBookId={selected.id}
+        clearSelectedBook={() => setSelected(emptySelection)}
       />
     </div>
   );

@@ -8,6 +8,22 @@ export const LOGIN_USER = gql`
   }
 `;
 
+export const CREATE_USER_BOOK_FROM_ISBN = gql`
+  mutation createBookFromIsbn($input: CreateUserBookFromIsbnInput!) {
+    createUserBookFromIsbn(input: $input) {
+      id
+      book {
+        id
+        title
+        author
+        pages
+      }
+      startDate
+      endDate
+    }
+  }
+`;
+
 export const CREATE_USER_BOOK = gql`
   mutation createUserBookFromBook($input: CreateUserBookFromBookInput!) {
     createUserBookFromBook(input: $input) {

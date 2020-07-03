@@ -7,6 +7,7 @@ import Home from "./components/Home";
 import gql from "graphql-tag";
 import DateFnsUtils from "@date-io/date-fns";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+import ButtonAppBar from "./ButtonAppBar";
 
 const IS_LOGGED_IN = gql`
   query IsUserLoggedIn {
@@ -22,7 +23,7 @@ const App = (props: any) => {
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <div className="App">
           <div className="header">
-            <h3>Reading Schedule Generator</h3>
+            <ButtonAppBar />
           </div>
           <div className="App-main">
             {data.isLoggedIn ? <Home /> : <Login />}

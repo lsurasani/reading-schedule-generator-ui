@@ -1,50 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import TextField from "@material-ui/core/TextField";
 import { DatePicker } from "@material-ui/pickers";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import { invalidDate } from "../../shared/utils";
 
-const ScheduleBook = (props: any) => {
-  const {
-    isOpen,
-    handleClose,
-    scheduleBook,
-    title,
-    author,
-    userBookId,
-    initialStart,
-    initialEnd,
-    clearSelectedBook,
-  } = props;
-
+const AddBookIsbn = (props: any) => {
+  const { isOpen, handleClose, createBook } = props;
   const errorDefault = {
+    isbn: "",
     startDate: "",
     endDate: "",
   };
 
+  const [isbn, setIsbn] = useState("");
   const [error, setError] = useState(errorDefault);
   const [startDate, setSelectedStartDate] = useState<Date | null>(null);
   const [endDate, setSelectedEndDate] = useState<Date | null>(null);
 
-  useEffect(() => {
-    const startDate = new Date(initialStart);
-    const endDate = new Date(initialEnd);
-
-    if (initialStart && !invalidDate(startDate)) {
-      setSelectedStartDate(startDate);
-    }
-
-    if (initialEnd && !invalidDate(endDate)) {
-      setSelectedEndDate(endDate);
-    }
-  }, [initialStart, initialEnd]);
-
   const clearState = () => {
+    setIsbn("");
     setError(errorDefault);
     setSelectedStartDate(null);
     setSelectedEndDate(null);
@@ -58,6 +37,13 @@ const ScheduleBook = (props: any) => {
     setSelectedEndDate(date);
   };
 
+  const handleChange = (
+    changeFn: React.Dispatch<React.SetStateAction<string>>,
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    changeFn(event.target.value);
+  };
+
   const validateInputs = () => {
     const noEndDateError = !endDate
       ? "End date is required if supplying a start date"
@@ -67,7 +53,10 @@ const ScheduleBook = (props: any) => {
         ? "End date must be after start date"
         : "";
 
+    const isbnError = isbn.length === 13 ? "" : "ISBN must be 13 letters";
+
     const newErrors = {
+      isbn: isbnError,
       startDate:
         endDate && !startDate
           ? "Start date is required if supplying an end date"
@@ -84,25 +73,35 @@ const ScheduleBook = (props: any) => {
   const submitInputs = () => {
     const userBookInputs = {
       input: {
-        id: userBookId,
+        isbn,
         startDate,
         endDate,
       },
     };
 
-    clearSelectedBook();
-    scheduleBook({ variables: userBookInputs });
+    createBook({ variables: userBookInputs });
     clearState();
   };
 
   return (
     <Dialog open={isOpen} onClose={handleClose}>
-      <DialogTitle id="add-book-dialog">Schedule Book</DialogTitle>
+      <DialogTitle id="add-book-dialog">Add Book</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {title} by {author}
+          Please add a book to your list using its ISBN-13 number.
         </DialogContentText>
         <Grid container spacing={1}>
+          <Grid item xs={12}>
+            <TextField
+              error={!!error.isbn}
+              helperText={error.isbn}
+              margin="dense"
+              id="isbn"
+              label="ISBN-13"
+              value={isbn}
+              onChange={(e) => handleChange(setIsbn, e)}
+            />
+          </Grid>
           <Grid item xs={6}>
             <DatePicker
               error={!!error.startDate}
@@ -147,4 +146,4 @@ const ScheduleBook = (props: any) => {
   );
 };
 
-export default ScheduleBook;
+export default AddBookIsbn;
